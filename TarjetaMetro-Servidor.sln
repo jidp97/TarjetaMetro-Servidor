@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Servidor WebSocket con la lógica del ascensor", "Servidor WebSocket con la lógica del ascensor.csproj", "{5CAF49F6-5A3B-4F4A-8472-ED9D089EF8EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5CAF49F6-5A3B-4F4A-8472-ED9D089EF8EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CAF49F6-5A3B-4F4A-8472-ED9D089EF8EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CAF49F6-5A3B-4F4A-8472-ED9D089EF8EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CAF49F6-5A3B-4F4A-8472-ED9D089EF8EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3F0EAC96-E4CE-4A0E-BB86-B20DCAE31079}
+	EndGlobalSection
+EndGlobal
