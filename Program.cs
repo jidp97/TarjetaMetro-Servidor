@@ -1,7 +1,12 @@
 ﻿using OfficeOpenXml;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace MetroCardSimulator
@@ -10,6 +15,7 @@ namespace MetroCardSimulator
     {
         static Dictionary<int, MovimientoTarjeta> movimientosTarjeta = new Dictionary<int, MovimientoTarjeta>();
         static System.Timers.Timer timer;
+        static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         static async Task Main(string[] args)
         {
@@ -51,7 +57,7 @@ namespace MetroCardSimulator
                     var webSocketContext = await context.AcceptWebSocketAsync(null);
 
                     // Maneja la conexión WebSocket de forma asincrónica
-                    await HandleWebSocketAsync(webSocketContext.WebSocket);
+                    _ = HandleWebSocketAsync(webSocketContext.WebSocket);
                 }
                 else
                 {
@@ -102,21 +108,38 @@ namespace MetroCardSimulator
                     // Realiza la acción correspondiente según el tipo de movimiento
                     if (tipoMovimiento == MovimientoTipo.Recarga)
                     {
-                        saldo += monto;
+                        await semaphore.WaitAsync();
+                        try
+                        {
+                            saldo += monto;
+                            Console.WriteLine($"Saldo actual de la tarjeta: {saldo}");
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
                     }
                     else if (tipoMovimiento == MovimientoTipo.Consumo)
                     {
-                        if (saldo >= monto)
+                        await semaphore.WaitAsync();
+                        try
                         {
-                            saldo -= monto;
-                            estacionDestino = (estacionDestino % 10) + 1; // Simula movimiento a una estación aleatoria
+                            if (saldo >= monto)
+                            {
+                                saldo -= monto;
+                                estacionDestino = (estacionDestino % 10) + 1; // Simula movimiento a una estación aleatoria
+                            }
+                            else
+                            {
+                                // Si no hay suficiente saldo, envía un mensaje de error al cliente
+                                string errorMessage = "\u001b[31mSaldo insuficiente para el viaje.\u001b[0m";
+                                byte[] errorBuffer = Encoding.UTF8.GetBytes(errorMessage);
+                                await webSocket.SendAsync(new ArraySegment<byte>(errorBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                            }
                         }
-                        else
+                        finally
                         {
-                            // Si no hay suficiente saldo, envía un mensaje de error al cliente
-                            string errorMessage = "\u001b[31mSaldo insuficiente para el viaje.\u001b[0m";
-                            byte[] errorBuffer = Encoding.UTF8.GetBytes(errorMessage);
-                            await webSocket.SendAsync(new ArraySegment<byte>(errorBuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                            semaphore.Release();
                         }
                     }
 
@@ -128,7 +151,15 @@ namespace MetroCardSimulator
                         SaldoRestante = saldo
                     };
 
-                    movimientosTarjeta.Add(movimientosTarjeta.Count + 1, movimiento);
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        movimientosTarjeta.Add(movimientosTarjeta.Count + 1, movimiento);
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
 
                     // Envía una actualización de estado al cliente
                     string response = $"\u001b[36mSaldo actual: {saldo}. Destino: Estación {estacionDestino}.\u001b[0m";
@@ -145,13 +176,13 @@ namespace MetroCardSimulator
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
 
-        private static void OnTimedEvent(Object source, ElapsedEventArgs e)
+        private static async void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             // Llama a la función para guardar los datos en Excel.
-            GuardarMovimientosEnExcel();
+            await GuardarMovimientosEnExcel();
         }
 
-        private static void GuardarMovimientosEnExcel()
+        private static async Task GuardarMovimientosEnExcel()
         {
             string fileName = "movimientos_tarjeta.xlsx"; // Nombre del archivo
             string directory = AppDomain.CurrentDomain.BaseDirectory; // Obtiene la ruta del directorio actual
@@ -177,16 +208,24 @@ namespace MetroCardSimulator
 
                 // Recorre los datos de movimientos y los agrega a la hoja de trabajo.
                 int row = 2;  // Comienza a escribir datos en la fila 2 (después de los encabezados)
-                foreach (var movimiento in movimientosTarjeta.Values)
+                await semaphore.WaitAsync();
+                try
                 {
-                    worksheet.Cells[row, 1].Value = movimiento.Tipo.ToString();
-                    worksheet.Cells[row, 2].Value = movimiento.Monto;
-                    worksheet.Cells[row, 3].Value = movimiento.SaldoRestante;
-                    row++;  // Avanza a la siguiente fila
+                    foreach (var movimiento in movimientosTarjeta.Values)
+                    {
+                        worksheet.Cells[row, 1].Value = movimiento.Tipo.ToString();
+                        worksheet.Cells[row, 2].Value = movimiento.Monto;
+                        worksheet.Cells[row, 3].Value = movimiento.SaldoRestante;
+                        row++;  // Avanza a la siguiente fila
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
                 }
 
                 // Guarda los cambios en el archivo de Excel.
-                package.Save();
+                await package.SaveAsync();
             }
 
             // Imprime un mensaje en la consola indicando la ubicación y la fecha/hora de guardado del archivo.
