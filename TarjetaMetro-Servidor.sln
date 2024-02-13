@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Servidor WebSocket con la lógica del ascensor", "Servidor WebSocket con la lógica del ascensor.csproj", "{5CAF49F6-5A3B-4F4A-8472-ED9D089EF8EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TarjetaMetro-Servidor", "TarjetaMetro-Servidor.csproj", "{5CAF49F6-5A3B-4F4A-8472-ED9D089EF8EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

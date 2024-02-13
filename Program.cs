@@ -60,9 +60,6 @@ namespace MetroCardSimulator
                     context.Response.Close();
                 }
             }
-
-
-            
         }
 
         static async Task HandleWebSocketAsync(WebSocket webSocket)
