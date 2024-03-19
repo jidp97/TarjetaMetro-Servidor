@@ -178,8 +178,16 @@ namespace MetroCardSimulator
 
         private static async void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
-            // Llama a la función para guardar los datos en Excel.
-            await GuardarMovimientosEnExcel();
+            await semaphore.WaitAsync();
+            try
+            {
+                // Llama a la función para guardar los datos en Excel.
+                await GuardarMovimientosEnExcel();
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         private static async Task GuardarMovimientosEnExcel()

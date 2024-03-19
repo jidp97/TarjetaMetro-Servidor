@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TarjetaMetro-Servidor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4df95fff4af2a425693f41b3ce3f482e1c8e377d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb10629658a05ef37b546c9f7b1b0d82ba3d3241")]
 [assembly: System.Reflection.AssemblyProductAttribute("TarjetaMetro-Servidor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TarjetaMetro-Servidor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
